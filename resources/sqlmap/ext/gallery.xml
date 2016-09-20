@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloudsea.photo.module.pic.dao.GalleryDao">
+<!--MyBatis 包含的jdbcType类型 
+	BIT         FLOAT      CHAR           TIMESTAMP       OTHER       UNDEFINED
+	TINYINT     REAL       VARCHAR        BINARY          BLOB        NVARCHAR
+	SMALLINT    DOUBLE     LONGVARCHAR    VARBINARY       CLOB        NCHAR
+	INTEGER     NUMERIC    DATE           LONGVARBINARY   BOOLEAN     NCLOB
+	BIGINT      DECIMAL    TIME           NULL            CURSOR
+  -->
+	
+	<select id="getGalleryByMenuId" parameterType="long" resultType="com.cloudsea.photo.entity.Gallery">
+		SELECT 
+			t.id AS id,
+			t.col_num AS colNum,
+			t.`enable` AS enable,
+			t.load_Num AS loadNum,
+			t.menu_Id AS menuId,
+			t.quer_Num AS querNum,
+			t.sort AS sort,
+			t.create_Time AS createTime,
+			t.update_Time AS updateTime
+		FROM t_gallery t WHERE t.menu_Id = #{0}
+	</select>
+	
+	<select id="getAllGallerys" resultType="com.cloudsea.photo.entity.Gallery">
+		SELECT 
+			t.id AS id,
+			t.col_num AS colNum,
+			t.`enable` AS enable,
+			t.load_Num AS loadNum,
+			t.menu_Id AS menuId,
+			t.quer_Num AS querNum,
+			t.sort AS sort,
+			t.create_Time AS createTime,
+			t.update_Time AS updateTime
+		FROM t_gallery t
+	</select>
+	
+	<delete id="deleteByMenuItemId" parameterType="java.lang.Integer" >
+    	delete from t_gallery where menu_Id = #{id, jdbcType=INTEGER}
+  	</delete>
+
+	<insert id="insertSelectiveAndGetId" useGeneratedKeys="true" keyProperty="id" parameterType="com.cloudsea.photo.entity.Gallery" >
+	    insert into t_gallery
+	    <trim prefix="(" suffix=")" suffixOverrides="," >
+	      <if test="id != null" >
+	        id,
+	      </if>
+	      <if test="menuId != null" >
+	        menu_Id,
+	      </if>
+	      <if test="colNum != null" >
+	        col_num,
+	      </if>
+	      <if test="sort != null" >
+	        sort,
+	      </if>
+	      <if test="querNum != null" >
+	        quer_Num,
+	      </if>
+	      <if test="loadNum != null" >
+	        load_Num,
+	      </if>
+	      <if test="enable != null" >
+	        enable,
+	      </if>
+	      <if test="createTime != null" >
+	        create_Time,
+	      </if>
+	      <if test="updateTime != null" >
+	        update_Time,
+	      </if>
+	    </trim>
+	    <trim prefix="values (" suffix=")" suffixOverrides="," >
+	      <if test="id != null" >
+	        #{id,jdbcType=INTEGER},
+	      </if>
+	      <if test="menuId != null" >
+	        #{menuId,jdbcType=INTEGER},
+	      </if>
+	      <if test="colNum != null" >
+	        #{colNum,jdbcType=INTEGER},
+	      </if>
+	      <if test="sort != null" >
+	        #{sort,jdbcType=VARCHAR},
+	      </if>
+	      <if test="querNum != null" >
+	        #{querNum,jdbcType=INTEGER},
+	      </if>
+	      <if test="loadNum != null" >
+	        #{loadNum,jdbcType=INTEGER},
+	      </if>
+	      <if test="enable != null" >
+	        #{enable,jdbcType=VARCHAR},
+	      </if>
+	      <if test="createTime != null" >
+	        #{createTime,jdbcType=TIMESTAMP},
+	      </if>
+	      <if test="updateTime != null" >
+	        #{updateTime,jdbcType=TIMESTAMP},
+	      </if>
+	    </trim>
+	  </insert>
+	  
+</mapper>

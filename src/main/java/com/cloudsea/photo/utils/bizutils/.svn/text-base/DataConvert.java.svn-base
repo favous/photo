@@ -1,0 +1,20 @@
+package com.cloudsea.sys.utils.bizutils;
+
+import net.sf.json.JSONObject;
+
+/**
+ * 
+ * @author zhangxiaorong
+ * @date 2014-8-15
+ */
+public class DataConvert {
+	
+
+	public static JSONObject toJSONObjectReturnInfo(boolean success, String msg) {
+		JSONObject jsonObj = new JSONObject();
+		jsonObj.put("success", success);
+		jsonObj.put("msg", msg);
+		return jsonObj;
+	}
+
+}

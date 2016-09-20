@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+    "http://www.mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cloudsea.photo.module.pic.dao.IconDao">
+<!--MyBatis 包含的jdbcType类型 
+	BIT         FLOAT      CHAR           TIMESTAMP       OTHER       UNDEFINED
+	TINYINT     REAL       VARCHAR        BINARY          BLOB        NVARCHAR
+	SMALLINT    DOUBLE     LONGVARCHAR    VARBINARY       CLOB        NCHAR
+	INTEGER     NUMERIC    DATE           LONGVARBINARY   BOOLEAN     NCLOB
+	BIGINT      DECIMAL    TIME           NULL            CURSOR
+  -->
+	
+	<select id="getIconByMenuId" parameterType="long" resultType="com.cloudsea.photo.entity.Icon">
+		SELECT
+			t.`enable` AS enable,
+			t.gallery_Id AS galleryId,
+			t.id AS id,
+			t.menu_Id AS menuId,
+			t.order_No AS orderNo,
+			t.picture_Src AS pictureSrc,
+			t.src AS src,
+			t.create_Time AS createTime,
+			t.update_Time AS updateTime
+		FROM t_icon t WHERE t.MENU_ID = #{0}
+	</select>
+	
+	<select id="getIconByPage" parameterType="com.cloudsea.common.dto.DataTableReqData" resultType="com.cloudsea.photo.entity.Icon">
+		SELECT
+			t.`enable` AS enable,
+			t.gallery_Id AS galleryId,
+			t.id AS id,
+			t.menu_Id AS menuId,
+			t.order_No AS orderNo,
+			t.picture_Src AS pictureSrc,
+			t.src AS src,
+			t.create_Time AS createTime,
+			t.update_Time AS updateTime
+		FROM 
+			t_icon t 
+		WHERE 
+			1 = 1
+	<if test="object != null" >		
+		<if test="object.menuId != null" >
+			and t.menu_Id = #{object.menuId}
+      	</if>
+		<if test="object.enable != null and object.enable != '' " >
+			and t.`enable` = #{object.enable}
+      	</if>
+     </if>
+		limit #{start}, #{length}
+	</select>
+
+	<select id="countIconBymenuId" parameterType="long" resultType="int">
+		SELECT count(0) FROM t_icon t WHERE t.MENU_ID = #{0}
+	</select>	
+
+	<select id="getAllIcons"  resultType="com.cloudsea.photo.entity.Icon">
+		SELECT
+			t.`enable` AS enable,
+			t.gallery_Id AS galleryId,
+			t.id AS id,
+			t.menu_Id AS menuId,
+			t.order_No AS orderNo,
+			t.picture_Src AS pictureSrc,
+			t.src AS src,
+			t.create_Time AS createTime,
+			t.update_Time AS updateTime
+		FROM 
+			t_icon t
+	</select>	
+  
+</mapper>

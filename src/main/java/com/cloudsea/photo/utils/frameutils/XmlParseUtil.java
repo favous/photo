@@ -1,0 +1,580 @@
+package com.cloudsea.photo.utils.frameutils;
+
+import java.io.File;
+import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.dom4j.Attribute;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
+import org.dom4j.io.SAXReader;
+import org.xml.sax.InputSource;
+
+public class XmlParseUtil {
+
+	public static String parseBeanToXmlString( Object obj, String beanName){
+
+		if(obj == null )
+			return null;
+		
+		if(beanName == null)
+			beanName = obj.getClass().getSimpleName();
+		
+		Document document = DocumentHelper.createDocument();//建立document对象，用来操作xml文件
+		document.addComment("This is a bean for dom4j ");//加入一行注释
+		Element rootEl = document.addElement(beanName);
+		createXmlFile(obj, rootEl);
+		
+		return document.asXML();
+	}
+
+	public static String parseBeanToXmlString( Object obj){
+		
+		return parseBeanToXmlString(obj, null);
+	}
+
+	
+	public static String parseBeanListToXmlString( List<?> list, String listName, String beanName){
+		
+		if (list == null )
+			return null;
+		
+		if (listName == null)
+			listName = list.getClass().getSimpleName();
+		
+		Document document = DocumentHelper.createDocument();//建立document对象，用来操作xml文件
+		document.addComment("This is a bean for dom4j ");//加入一行注释
+		Element listEl = document.addElement(listName);
+		
+		for(int i = 0 ; i < list.size(); i++){
+			
+			if(beanName == null)
+				beanName = list.get(i).getClass().getSimpleName();			
+			Element beanEl = listEl.addElement(beanName);
+			createXmlFile(list.get(i), beanEl);
+		}
+		
+		return document.asXML();
+	}
+	
+
+	public static String parseBeanListToXmlString( List<?> list){
+		
+		return parseBeanListToXmlString( list, null, null);
+	}
+
+	
+	/**
+	 * 
+	 * @param filePath 文件路径
+	 * @param obj 被传值的对象
+	 * @param objName 被传值的对象名
+	 * @return
+	 */
+	public static Object parseFileXMLToBean (String filePath, Object obj, String objName){
+
+		if(obj == null || filePath == null)
+			return null;
+		
+		Document doc = loadFile(filePath);
+		Element root = doc.getRootElement();
+		
+		if(objName == null){
+			String name = root.getName();
+			objName = name.substring(0, 1) + name.substring(1);
+		}
+		
+		parseElementToBean(root, obj, objName);
+		return obj;
+	}
+
+	
+	public static Object parseFileXMLToBean (String filePath, Object obj){
+		
+		return parseFileXMLToBean(filePath, obj, null);
+	}
+
+	
+	/**
+	 * 
+	 * @param content XML字符串内容
+	 * @param obj 被传值的对象
+	 * @param objName 被传值的对象名
+	 * @return
+	 */
+	public static Object parseStringXMLToBean (String content, Object obj, String objName){
+
+		if(obj == null || content == null || "".equals(content.trim()))
+			return null;
+		
+		Document doc = loadString(content);
+		Element root = doc.getRootElement();
+		
+		if(objName == null){
+			String name = root.getName();
+			objName = name.substring(0, 1).toUpperCase() + name.substring(1);
+		}
+		
+		parseElementToBean(root, obj, objName);
+		return obj;
+	}
+	
+	
+	public static Object parseStringXMLToBean (String content, Object obj){
+		
+		return parseStringXMLToBean (content , obj, null);
+	}
+
+	
+	/**
+	 * 
+	 * @param content 被转化的字符串
+	 * @param list 用来存放值的LIST集合对象
+	 * @param listName 给定LIST集合名字
+	 * @param claz LIST集合的元素的类型
+	 * @return
+	 */
+	public static <T> List<T> parseStringXMLToBeanList (String content, List<T> list, String listName, Class<T> claz){
+		
+		try {
+			 T o = claz.newInstance();
+			list.add(o);
+			parseStringXMLToBean(content, list, listName);
+			list.remove(o);
+			return list;
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	public static <T> List<T> parseStringXMLToBeanList (String content, List<T> list, Class<T> claz){
+		
+		return parseStringXMLToBeanList(content, list, null, claz);
+	}
+
+	
+	
+	/**
+	 * 
+	 * @param obj 		对象
+	 * @param element 	需要添入对象值的XML 元素
+	 */
+	private static void createXmlFile( Object obj, Element element){
+
+		if( element ==null )
+			return;
+			
+		if(obj == null)
+			obj = "";
+			
+		if (isListOrSet(obj)){//对象是集合
+			
+			
+		} 
+		
+		if (isDate(obj))
+			obj = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format((Date)obj);
+		
+		if (isJavaAPI(obj)){
+			element.setText(String.valueOf(obj));
+			return;
+		}
+		
+		Field[] fields = obj.getClass().getDeclaredFields();//对象不是集合
+		if (isBaseType(obj.getClass()) || fields == null || fields.length == 0){
+			element.setText(String.valueOf(obj));
+			return;
+		}
+		
+		for (int i = 0; i < fields.length; i++){
+			
+			try {
+				
+				fields[i].setAccessible(true);
+				Object o = fields[i].get(obj);
+				Element el = element.addElement(fields[i].getName());
+				createXmlFile(o, el);
+				
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
+		
+	//递归遍历所有元素, 映射到map保存
+	@SuppressWarnings("unchecked")
+	public static Map<String, Object> parseElementToMap(Map<String, Object> map, Element el){
+		
+		List<Element> elList = el.elements();
+		List<Attribute> attList = el.attributes();
+		if(elList.size() == 0 && attList.size() ==0 )
+			map.put(el.getName(), el.getStringValue());
+		else{
+			Map<String, Object> m = new HashMap<String, Object>();
+			for( int i = 0; i < elList.size(); i++)
+				parseElementToMap(m, elList.get(i));
+			for( int i = 0; i < attList.size(); i++)
+				m.put(attList.get(i).getName(), attList.get(i).getValue());
+			
+			map.put(el.getName(), m);
+		}
+		
+		return map;
+	}
+	
+	
+	//读取XML文档
+	private static Document loadFile(String filePath) {
+
+		if(filePath == null || "".equals(filePath.trim()))
+			return null;
+		
+		try {
+			SAXReader saxReader =new SAXReader();
+			return saxReader.read(new File(filePath)); //读取XML文件,获得document对象
+
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+	
+	
+	//读取XML文档
+	private static Document loadString(String content) {
+
+		if(content == null || "".equals(content.trim()))
+			return null;
+
+		try {
+			StringReader read = new StringReader(content);
+			InputSource source = new InputSource(read);
+			SAXReader saxReader =new SAXReader();
+			return saxReader.read(source); //读取XML文件,获得document对象
+
+		} catch (Exception ex) {
+			return null;
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	private static Object parseElementToBean( Element el, Object obj, String objName){
+		
+		if(el == null || obj == null)
+			return null;
+		
+		String elName = el.getName();
+		if( objName == null || elName ==null || elName.trim().equals("") || !objName.equals(elName) )
+			return null;
+		
+		Field[] fields = obj.getClass().getDeclaredFields();
+		List<Attribute> attList = el.attributes();
+		List<Element> elList = el.elements();
+		
+		if (isDate(obj))
+			try {
+				String str = el.getText();
+				if (str.indexOf(":") < 0)
+					str = str + " 00:00:00";
+				return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(str);
+			} catch (ParseException e2) {
+				return null;
+			}
+		
+		if( elList.size() == 0 || isBaseType(obj.getClass()))
+			try {
+				return obj.getClass().getConstructor(String.class).newInstance(el.getText());
+			} catch (IllegalArgumentException e1) {
+				e1.printStackTrace();
+			} catch (SecurityException e1) {
+				e1.printStackTrace();
+			} catch (InstantiationException e1) {
+				e1.printStackTrace();
+			} catch (IllegalAccessException e1) {
+				e1.printStackTrace();
+			} catch (InvocationTargetException e1) {
+				e1.printStackTrace();
+			} catch (NoSuchMethodException e1) {
+				e1.printStackTrace();
+			}
+		
+		int same = checkElementSameNames(elList, obj);
+		
+		if(same == 1){ //  表示元素各不相同
+			
+			for(int i = 0; i < attList.size(); i++ ){
+				String attrName = attList.get(i).getName();
+				Field field = findField(attrName, fields);
+				if(field != null){
+					String value = el.attributeValue(attrName);
+					field.setAccessible(true);
+					try {
+						field.set(obj, value);
+					} catch (IllegalArgumentException e) {
+						e.printStackTrace();
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+			
+			for(int i = 0; i < elList.size(); i++ ){
+				String eleName = elList.get(i).getName();
+				Field field = findField(eleName, fields);
+				if(field != null){
+					try {
+						Object o = getInstanceByClass(field.getType());
+						Object bean = parseElementToBean(elList.get(i), o, eleName);
+						field.setAccessible(true);
+						field.set(obj, bean);
+					} catch (IllegalAccessException e) {
+						e.printStackTrace();
+					} 
+				}
+			}
+		}
+		
+		else if (same == 2){//  表示各元素都相同, obj是集合, 如set，list
+			
+			String eleName = elList.get(0).getName();
+			
+//			Type[] genType = obj.getClass().getGenericInterfaces();  
+//	        Type[] params = ((ParameterizedType) genType[0]).getActualTypeArguments();  
+//	        Class cls = (Class) params[0]; 
+//	        if(!eleName.equals(cls.getSimpleName()))
+//	        	return null;
+			
+			List<?> list = (List<?>)obj;//这里设定如果是集合，就必须为LIST
+			Class<?> cls = list.get(0).getClass();
+			
+			for(int i = 0; i < elList.size(); i++ ){
+				try {
+					Object o = cls.newInstance();
+					Object bean = parseElementToBean(elList.get(i), o, eleName);
+					Method method = findNeededMethod("add", new Class[]{Object.class}, obj.getClass().getDeclaredMethods());
+					method.invoke(obj, bean);
+				} catch (InstantiationException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				} catch (SecurityException e) {
+					e.printStackTrace();
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (InvocationTargetException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+					
+		else {
+			return null;
+		}
+		
+		
+		return obj;
+	}
+	
+
+	private static int checkElementSameNames(List<Element> elList, Object obj){
+		
+		if(elList == null || elList.size() == 0)
+			return 0;	//  表示集合无元素
+		
+		if (obj.getClass().getName().contains("java.util."))
+			return 2;
+			
+		Set<String> set = new HashSet<String>();
+		for(Element el : elList)
+			set.add(el.getName());
+		
+		if (set.size() == elList.size())
+			return 1;  //  表示元素各不相同
+		else if (set.size() == 1 && elList.size() > 1)
+			return 2;	//  表示各元素都相同
+		else
+			return 3;
+	}
+	
+	
+	private static Field findField( String attrName, Field[] fields){
+		
+		if( attrName == null || "".equals(attrName.trim()) || fields == null || fields.length == 0)
+			return null;
+		
+		for(Field f : fields){
+			String fName = f.getName();
+			if( attrName.equals(fName) )
+				return f;
+		}
+		return null;
+	}
+
+	
+	private static Method findNeededMethod( String methodName, Class<?>[] cs, Method[] methods){
+		
+		if(methodName == null || "".equals(methodName.trim()) || methods == null || methods.length == 0)
+			return null;
+		
+		out:
+		for(Method m : methods){
+			Class<?>[] clzs = m.getParameterTypes();
+			
+			if (cs.length != clzs.length)
+				continue;
+			
+			for (int i = 0; i < cs.length; i++)
+				if (cs[i] != clzs[i])
+					continue out;
+					
+			if (methodName.equals(m.getName()))
+				return m;
+		}
+		return null;
+	}
+	
+	
+	private static boolean isBaseType(Class<?> o) {
+		
+		if(o == null)
+			return true;
+		
+		String className = o.getName();
+		if (className == null)
+			return false;
+		if (o.isPrimitive())
+			return true;
+		if (o == Byte.class)
+			return true;
+		if (o == Character.class)
+			return true;
+		if (o == Short.class)
+			return true;
+		if (o == Integer.class)
+			return true;
+		if (o == Long.class)
+			return true;
+		if (o == Float.class)
+			return true;
+		if (o == Double.class)
+			return true;
+		if (o == Boolean.class)
+			return true;
+		if (o == String.class)
+			return true;
+		if (o == StringBuffer.class)
+			return true;
+		if (o == StringBuilder.class)
+			return true;
+		if (o == BigInteger.class)
+			return true;
+		if (o == BigDecimal.class)
+			return true;
+		return false;
+	}
+	
+	private static boolean isListOrSet(Object obj){
+		
+		
+		
+		return false;
+	}
+	
+	
+	private static boolean isDate(Object obj) {
+		
+		String fulname = obj.getClass().getName();
+		if (fulname.contains("java.util.Date") || fulname.contains("java.sql.Date"))
+			return true;
+		
+		return false;
+	}
+
+
+	private static boolean isJavaAPI(Object obj){
+		
+		ClassLoader loader = obj.getClass().getClassLoader();
+		
+		if (loader == null)  //有一些系统加载器，应该得不到，会返回空
+			return true;
+		
+		Class<?> cls = loader.getClass();
+		List<Class<?>> list = new ArrayList<Class<?>>();
+		List<Class<?>> listClass = getAllSuperClass(cls, list);
+		
+		for (Class<?> claz : listClass)
+			if (claz.getSimpleName().contains("URLClassLoader"))
+				return false;
+		else {
+			
+		}
+		return true;
+	}
+
+	
+	private static List<Class<?>> getAllSuperClass( Class<?> claz, List<Class<?>> list) {
+		
+		if (claz.getSuperclass() != null){
+			list.add(claz.getSuperclass());
+			getAllSuperClass(claz.getSuperclass(), list);
+		}
+		return list;
+	}
+
+
+	static Object getInstanceByClass(Class<?> claz){
+		try {				
+			if (claz == Long.class || claz == Integer.class || claz == Short.class || 
+					claz == Double.class || claz == Float.class || claz == Byte.class )
+				return claz.getConstructor(String.class).newInstance("0");
+			else 
+				return claz.newInstance();
+		} catch (SecurityException e) {
+			e.printStackTrace();
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+		} catch (NoSuchMethodException e) {
+			e.printStackTrace();
+		}
+		
+		return null;
+	}
+	
+	
+	public static void parseXmlToArray() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public static String parseArrayToXml(Object[] objects) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+}

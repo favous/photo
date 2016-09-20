@@ -1,0 +1,57 @@
+<html>
+
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+
+<title>新蜂摄影照片管理系统</title>
+
+<style type="text/css">
+	input {
+		color: #606060; width: 140px; height: 22px;
+	}
+</style>
+
+<script type="text/javascript" src="../lib/common/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="../lib/common/common.js"></script>
+
+<script type="text/javascript">
+
+$(function(){
+	$('#submit').click(function(){
+		$('#loginForm').attr("action", getRootPath(true) + "/user/login");
+		$('#loginForm').submit();
+	});
+});
+	
+</script>
+</HEAD>
+
+<BODY>
+	<form id="loginForm" method="post">
+		
+		<table width="130" border="0" align="center" style="padding-top: 15%;">
+			
+			<tr align="center">
+				<td valign="bottom">请登录</td>
+			</tr>
+
+			<tr>
+				<td height="28"><input type="text" name="loginName" ></TD>
+			</tr>
+
+			<tr>
+				<td height="28"><input type="text" name="password" ></TD>
+			</tr>
+
+			<tr style="display:none;">
+				<td height="51" valign="bottom"><SPAN id="errorMess"></SPAN></td>
+			</tr>
+
+			<tr>
+				<td id="submit" height="51" align="center"><button>提交</button></td>
+			</tr>
+		</table>
+	</form>
+</BODY>
+</HTML>

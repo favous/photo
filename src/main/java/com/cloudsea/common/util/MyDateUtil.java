@@ -1,0 +1,50 @@
+package com.cloudsea.common.util;
+
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+
+public class MyDateUtil {
+	
+	/**
+	 * @author zhangXiaoRong
+	 * 比较两个时间差距多少天
+	 */
+	public static long betweenDay(Date oldDate, Date newDate){
+		
+		long l=newDate.getTime()-oldDate.getTime();
+
+		return l/(24*60*60*1000);
+		
+	}
+	
+	public static Date formatStringToDate(String date, String pattern){
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		try {
+			return sdf.parse(date);
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	public static String formatDateToString(Date date, String pattern){
+		SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+		return sdf.format(date);
+	}
+
+	//判断日期是否为周末
+	public	boolean isWeekend(Date date){
+		Calendar day = Calendar.getInstance();
+		day.setTime(date);
+		boolean lag=false;
+		if(day.get(Calendar.DAY_OF_WEEK)==Calendar.SATURDAY||day.get(Calendar.DAY_OF_WEEK)==Calendar.SUNDAY){
+			lag=true;
+		}
+		return lag;
+	}
+
+	
+
+}

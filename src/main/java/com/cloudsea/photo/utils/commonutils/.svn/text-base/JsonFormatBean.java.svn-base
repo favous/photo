@@ -1,0 +1,376 @@
+/**
+ * 
+ */
+package com.cloudsea.sys.utils.commonutils;
+
+import java.lang.reflect.Field;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
+
+import com.cloudsea.sys.entity.BaseEntity;
+import com.cloudsea.sys.entity.Resource;
+import com.cloudsea.sys.entity.Role;
+import com.cloudsea.sys.entity.User;
+
+import net.sf.json.JSONArray;
+import net.sf.json.JSONObject;
+
+/**
+ * @author zhangxiaorong
+ * 2014-6-29
+ */
+public class JsonFormatBean<T> {
+	
+	//map.key:hashCode 		map.value:jsonobj
+	private Map<Integer, Object> hashCodeMap = new HashMap<Integer, Object>();
+	
+	//指定转换日期格式
+	private SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+	//指定一些类型的值，用自定义转换方法
+	private Map<Class<?>, FormateByUser> formateByUserMap = new HashMap<Class<?>, FormateByUser>();
+	
+	//哪些属性不转换
+	private Map<String, Object> unFormateFields = new HashMap<String, Object>();
+	
+	
+	
+	//转换子属性深度
+	private int formateDepth = 3;
+	
+	private int currentDepth = 0;
+
+		
+	public void setFormateDepth(int formateDepth) {
+		this.formateDepth = formateDepth;
+	}
+	public SimpleDateFormat getDateFormat() {
+		return dateFormat;
+	}
+	public void setDateFormat(SimpleDateFormat dateFormat) {
+		this.dateFormat = dateFormat;
+	}
+	public Map<String, Object> getUnFormateFields() {
+		return unFormateFields;
+	}
+	public void setUnFormateFields(Map<String, Object> unFormateFields) {
+		this.unFormateFields = unFormateFields;
+	}
+	public Map<Class<?>, FormateByUser> getFormateByUserMap() {
+		return formateByUserMap;
+	}
+	public void setFormateByUserMap(Map<Class<?>, FormateByUser> formateByUserMap) {
+		this.formateByUserMap = formateByUserMap;
+	}
+	
+	
+	
+	public JSONArray toJSONArray(Collection<T> entityList){
+		JSONArray jsonAarry = new JSONArray();
+		if (entityList != null && entityList.size() > 0)
+			for (T obj : entityList)
+				jsonAarry.add(this.toJSON(obj)); 
+		return jsonAarry;
+	}
+	
+	
+	
+	
+	public JSONObject toJSON(T t) {
+		return toJSON(t, true);
+	}
+
+	//此方法可重写，默认获取的是对象本身所有的属性值，但不包括父对象属性的值
+	public Field[] getDeclaredFields(Object t){
+		return t.getClass().getDeclaredFields();
+	}
+	
+	private JSONObject toJSON(Object t, boolean isbegin) {
+		
+		if (isbegin == true)
+			hashCodeMap.clear();
+		
+		if (existObject(t))
+			return (JSONObject) hashCodeMap.get(t.hashCode());
+		
+		JSONObject jsonObj = new JSONObject();
+		hashCodeMap.put(t.hashCode(), jsonObj);
+		
+		try {
+			
+			if (Map.class.isAssignableFrom(t.getClass())){
+				
+				Map<Object, Object> map = (Map<Object, Object>) t;
+				if (map.size() == 0)
+					return jsonObj;
+				for (Entry<Object, Object> entry : map.entrySet()){
+					Object fieldValue = entry.getValue();
+					Object fieldName = entry.getKey();
+						
+					if (fieldValue == null)
+						continue;
+					
+					Object val = parseVal(fieldValue, fieldValue.getClass());
+					jsonObj.put(fieldName, val);
+				}
+				return jsonObj;
+				
+			} else{
+				
+				Field[] fields = getDeclaredFields(t);
+				sortFields(fields);
+				
+				for (int i = 0; i < fields.length; i++){
+					
+					String fieldName = fields[i].getName();
+					fields[i].setAccessible(true);
+					Object fieldValue = fields[i].get(t);
+					
+					if (fieldValue == null)
+						continue;
+					
+					Object val = parseVal(fieldValue, fields[i].getType());
+					jsonObj.put(fieldName, val);
+				}
+			}
+				
+		} catch (IllegalArgumentException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return jsonObj;
+	}
+	
+	private Object parseVal(Object fieldValue, Class<?> type) throws Exception {
+		
+		for (Entry<Class<?>, FormateByUser> entry : formateByUserMap.entrySet())
+			if (entry.getKey() == type)
+				return entry.getValue().formate(fieldValue);
+		
+		if (isBaseType(type))
+			return fieldValue;
+		
+		else if (isTimestampType(type))
+			return dateFormat.format(((Timestamp)fieldValue).getTime());
+		
+		else if (isDateType(type))
+			return dateFormat.format(fieldValue);
+		
+		else if (Collection.class.isAssignableFrom(type)){
+			
+			if (existObject(fieldValue))
+				return hashCodeMap.get(fieldValue.hashCode());
+			
+			Collection<?> col = (Collection<?>) fieldValue;
+			
+			if (col.size() == 0)
+				return null;
+				
+			else {
+				JSONArray jsonAarry = new JSONArray();
+				
+				Iterator<?> it = col.iterator();
+				element:
+					while (it.hasNext()){
+						
+						Object entity = it.next();
+						if (existObject(entity)){
+							jsonAarry.add(hashCodeMap.get(entity.hashCode()));
+							continue element;
+						}
+						
+						JSONObject obj = null;
+						if (currentDepth < formateDepth){
+							currentDepth++;
+							obj = this.toJSON(entity, false);
+						}
+						jsonAarry.add(obj);
+						hashCodeMap.put(entity.hashCode(), obj);
+					}
+				
+				hashCodeMap.put(col.hashCode(), jsonAarry);
+				return jsonAarry;
+			}
+		}
+		
+		else {
+			if (!existObject(fieldValue)){
+				JSONObject obj = null;
+				if (currentDepth < formateDepth){
+					currentDepth++;
+					obj = this.toJSON(fieldValue, false);
+				}
+				hashCodeMap.put(fieldValue.hashCode(), obj);
+				return obj;
+			} else{
+				return hashCodeMap.get(fieldValue.hashCode());
+			}
+		}
+	}
+	
+	/**
+	 * 把集合放在后面，把非集合属性放前面
+	 * hashcodelist 是用来判断，不让整个Bean中的属性和子属性中，有重复的对象存入。
+	 * 这样各层的属性值如果是同样的对象，就可以先执行放到上层属性中，而不会放到下层的集合中
+	 */
+	private static void sortFields(Field[] fields) {
+		if (fields.length == 0)
+			return;
+		
+		for (int i = 0; i < fields.length - 1; i++){
+			if (Collection.class.isAssignableFrom(fields[i].getType())){
+				Field temp = fields[i];
+				for (int j = i + 1; j < fields.length; j++)
+					fields[j-1] = fields[j];
+				fields[fields.length-1] = temp;
+			}
+		}
+	}
+
+	private boolean existObject(Object obj) {
+		
+		if (obj == null)
+			return true;
+		for (Integer val :hashCodeMap.keySet())
+			if (val.hashCode() == obj.hashCode())
+				return true;
+		return false;
+	}
+
+	private static boolean isDateType(Class<?> claz) {
+		
+		if(claz == null)
+			return false;
+
+		if (claz.getName().equals(java.sql.Date.class.getName()))
+			return true;
+
+		if (claz.getName().equals(java.util.Date.class.getName()))
+			return true;
+		
+		return false;
+	}
+	
+	private static boolean isTimestampType(Class<?> claz) {
+		if(claz == null)
+			return false;
+
+		if (claz.getName().equals(java.sql.Timestamp.class.getName()))
+			return true;
+		
+		return false;
+	}
+
+
+	private static boolean isBaseType(Class<?> o) {
+		
+		if(o == null)
+			return true;
+		
+		String className = o.getName();
+		if (className == null)
+			return false;
+		if (o.isPrimitive())
+			return true;
+		if (o == Byte.class)
+			return true;
+		if (o == Character.class)
+			return true;
+		if (o == Short.class)
+			return true;
+		if (o == Integer.class)
+			return true;
+		if (o == Long.class)
+			return true;
+		if (o == Float.class)
+			return true;
+		if (o == Double.class)
+			return true;
+		if (o == Boolean.class)
+			return true;
+		if (o == String.class)
+			return true;
+		if (o == StringBuffer.class)
+			return true;
+		if (o == StringBuilder.class)
+			return true;
+		if (o == BigInteger.class)
+			return true;
+		if (o == BigDecimal.class)
+			return true;
+		return false;
+	}
+	
+	public static void main(String[] args) {
+		System.out.println("start JsonFormatBean");
+		
+		Resource res = new Resource();
+		res.setResourceNo("setResourceNo");
+		Resource resource = new Resource();
+		resource.setId(3424l);
+		resource.setParent(res);
+		
+		Set<Resource> resources = new HashSet<Resource>();
+		resources.add(resource);
+		
+		Role role = new Role();
+		role.setId(22l);
+		role.setResources(resources);
+		
+		Set<Role> roles = new HashSet<Role>();
+		roles.add(role);
+		
+		User u = new User();
+		u.setLoginName("setLoginName");
+		u.setCreateTime(new Date());
+		u.setId(11l);
+		u.setRoles(roles);
+		u.setRoles(roles);
+		
+		JsonFormatBean<BaseEntity> f = new JsonFormatBean<BaseEntity>(){
+			public Field[] getDeclaredFields(Object t) {
+				Field[] fs = super.getDeclaredFields(t);
+				try {
+					Field f = t.getClass().getSuperclass().getDeclaredField("id");
+					System.arraycopy(new Field[]{f}, 0, fs, 0, 1);
+				} catch (Exception e) {
+					e.printStackTrace();
+				} 
+				return fs;
+			}
+		};
+		f.getFormateByUserMap().put(String.class, new FormateByUser(){
+			public Object formate(Object obj) {
+				return "FormateByUser:" + obj;
+			}
+		});
+		f.getFormateByUserMap().put(Date.class, new FormateByUser(){
+			public Object formate(Object obj) {
+				return "2000-01-01";
+			}
+		});
+
+		f.setFormateDepth(5);
+		JSONObject jobj = f.toJSON(u);
+		System.out.println(jobj);
+		
+	}
+	
+	public interface FormateByUser{
+		Object formate(Object obj) throws Exception;
+	}
+	
+}

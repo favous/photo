@@ -1,0 +1,42 @@
+package com.cloudsea.photo.utils.commonutils;
+  
+import org.apache.log4j.Logger;   
+import org.apache.log4j.PropertyConfigurator;   
+  
+
+
+/**  
+ * @author caolianjiao  
+ * Log  
+ */  
+public class Log {   
+	
+	private static Log log;
+	
+	private Logger logger;
+	// 将Log类封装成单实例的模式，独立于其他类。以后要用到日志的地方只要获得Log的实例就可以方便使用
+	
+	String rootPath = System.getProperty("user.dir");
+
+	private Log() {
+		
+		// 获得日志类loger的实例
+		logger = Logger.getLogger(this.getClass());
+		// loger所需的配置文件路径
+		PropertyConfigurator.configure(rootPath + "/conf/log4j.properties");
+	}
+
+	public static Logger getLoger() {
+		
+		if (log == null)
+			synchronized(Log.class){
+				if (log == null)
+					log = new Log();
+			}
+		
+		return log.logger;
+	}
+	
+
+
+}
