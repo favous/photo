@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cloudsea.photo.module.pic.dao.IconMapper">
+  <resultMap id="BaseResultMap" type="com.cloudsea.photo.entity.Icon" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="menu_Id" property="menuId" jdbcType="INTEGER" />
+    <result column="gallery_Id" property="galleryId" jdbcType="INTEGER" />
+    <result column="order_No" property="orderNo" jdbcType="VARCHAR" />
+    <result column="src" property="src" jdbcType="VARCHAR" />
+    <result column="picture_Src" property="pictureSrc" jdbcType="VARCHAR" />
+    <result column="enable" property="enable" jdbcType="VARCHAR" />
+    <result column="create_Time" property="createTime" jdbcType="TIMESTAMP" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, menu_Id, gallery_Id, order_No, src, picture_Src, enable, create_Time, update_time
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_icon
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_icon
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.cloudsea.photo.entity.Icon" >
+    insert into t_icon (id, menu_Id, gallery_Id, 
+      order_No, src, picture_Src, 
+      enable, create_Time, update_time
+      )
+    values (#{id,jdbcType=INTEGER}, #{menuId,jdbcType=INTEGER}, #{galleryId,jdbcType=INTEGER}, 
+      #{orderNo,jdbcType=VARCHAR}, #{src,jdbcType=VARCHAR}, #{pictureSrc,jdbcType=VARCHAR}, 
+      #{enable,jdbcType=VARCHAR}, #{createTime,jdbcType=TIMESTAMP}, #{updateTime,jdbcType=TIMESTAMP}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.cloudsea.photo.entity.Icon" >
+    insert into t_icon
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="menuId != null" >
+        menu_Id,
+      </if>
+      <if test="galleryId != null" >
+        gallery_Id,
+      </if>
+      <if test="orderNo != null" >
+        order_No,
+      </if>
+      <if test="src != null" >
+        src,
+      </if>
+      <if test="pictureSrc != null" >
+        picture_Src,
+      </if>
+      <if test="enable != null" >
+        enable,
+      </if>
+      <if test="createTime != null" >
+        create_Time,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="menuId != null" >
+        #{menuId,jdbcType=INTEGER},
+      </if>
+      <if test="galleryId != null" >
+        #{galleryId,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="src != null" >
+        #{src,jdbcType=VARCHAR},
+      </if>
+      <if test="pictureSrc != null" >
+        #{pictureSrc,jdbcType=VARCHAR},
+      </if>
+      <if test="enable != null" >
+        #{enable,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.cloudsea.photo.entity.Icon" >
+    update t_icon
+    <set >
+      <if test="menuId != null" >
+        menu_Id = #{menuId,jdbcType=INTEGER},
+      </if>
+      <if test="galleryId != null" >
+        gallery_Id = #{galleryId,jdbcType=INTEGER},
+      </if>
+      <if test="orderNo != null" >
+        order_No = #{orderNo,jdbcType=VARCHAR},
+      </if>
+      <if test="src != null" >
+        src = #{src,jdbcType=VARCHAR},
+      </if>
+      <if test="pictureSrc != null" >
+        picture_Src = #{pictureSrc,jdbcType=VARCHAR},
+      </if>
+      <if test="enable != null" >
+        enable = #{enable,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null" >
+        create_Time = #{createTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.cloudsea.photo.entity.Icon" >
+    update t_icon
+    set menu_Id = #{menuId,jdbcType=INTEGER},
+      gallery_Id = #{galleryId,jdbcType=INTEGER},
+      order_No = #{orderNo,jdbcType=VARCHAR},
+      src = #{src,jdbcType=VARCHAR},
+      picture_Src = #{pictureSrc,jdbcType=VARCHAR},
+      enable = #{enable,jdbcType=VARCHAR},
+      create_Time = #{createTime,jdbcType=TIMESTAMP},
+      update_time = #{updateTime,jdbcType=TIMESTAMP}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

@@ -1,0 +1,81 @@
+<ehcache> 
+<!--设置缓存文件 .data 的创建路径。
+    如果该路径是 Java 系统参数，当前虚拟机会重新赋值。
+    下面的参数这样解释：
+    user.home - 用户主目录
+    user.dir       - 用户当前工作目录
+    java.io.tmpdir - 默认临时文件路径 
+-->
+ <diskStore path="java.io.tmpdir"/>
+ <!--
+     
+	必须属性：
+	name:设置缓存的名称，用于标志缓存,唯一
+	maxElementsInMemory:在内存中最大的对象数量
+	maxElementsOnDisk：在DiskStore中的最大对象数量，如为0，则没有限制
+	eternal：设置元素（译注：内存中对象）是否永久驻留。如果是，将忽略超时限制且元素永不消亡。
+	overflowToDisk：设置当内存中缓存达到 maxInMemory 限制时元素是否可写到磁盘上。
+	
+	可选的属性：
+	timeToIdleSeconds：设置元素过期前的空闲时间（秒）
+                                           也就是在一个元素消亡之前，两次访问时间的最大时间间隔值。
+                                           这只能在元素不是永久驻留时有效（译注：如果对象永恒不灭，则
+                                           设置该属性也无用）。
+                                           如果该值是 0 就意味着元素可以停顿无穷长的时间。
+	timeToLiveSeconds：设置元素过期前的活动时间（秒）
+                                            也就是一个元素从构建到消亡的最大时间间隔值。
+                                            这只能在元素不是永久驻留时有效。
+	diskPersistent：是否disk store在虚拟机启动时持久化。默认为false
+	diskExpiryThreadIntervalSeconds:运行disk终结线程的时间，默认为120秒
+	memoryStoreEvictionPolicy：策略关于Eviction
+
+	缓存子元素：
+	cacheEventListenerFactory：注册相应的的缓存监听类，用于处理缓存事件，如put,remove,update,和expire
+	bootstrapCacheLoaderFactory:指定相应的BootstrapCacheLoader，用于在初始化缓存，以及自动设置。
+
+ -->
+ 
+    
+   <!-- 分布式缓存：分布式缓存配置方法 是基于RMI方式的。multicastGroupAddress和multicastGroupPort指定其他服务部署的服务器
+   	<cacheManagerPeerProviderFactory
+	    class="net.sf.ehcache.distribution.RMICacheManagerPeerProviderFactory"
+	    properties="peerDiscovery=automatic, multicastGroupAddress=230.0.0.1, multicastGroupPort=4446"/>
+
+	<cacheManagerPeerListenerFactory
+	    class="net.sf.ehcache.distribution.RMICacheManagerPeerListenerFactory"/>
+	 -->
+	    
+   <!-- 永不自动清理配置 -->
+   <cache name="com.capinfo.web.cache.MODEL_CACHE" 
+        maxElementsInMemory="100000" 
+        eternal="true" 
+        timeToIdleSeconds="0" 
+        timeToLiveSeconds="3000" 
+        overflowToDisk="true" 
+        > 
+         <!-- <cacheEventListenerFactory class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"/> -->
+   </cache>
+   
+   <!-- 自动清理配置：4小时 -->
+   <cache name="com.capinfo.web.cache.MOTHOD_CACHE" 
+        maxElementsInMemory="100000" 
+        eternal="false" 
+        timeToIdleSeconds="300" 
+        timeToLiveSeconds="14400" 
+        overflowToDisk="true" 
+        > 
+        <!--  <cacheEventListenerFactory class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"/> -->
+   </cache>
+        
+   <!-- 默认配置 -->
+   <defaultCache 
+      maxElementsInMemory="100000" 
+      eternal="false" 
+      timeToIdleSeconds="500" 
+      timeToLiveSeconds="3000" 
+      overflowToDisk="true" 
+        > 
+        <!--  <cacheEventListenerFactory class="net.sf.ehcache.distribution.RMICacheReplicatorFactory"/> -->
+   </defaultCache>
+
+</ehcache> 

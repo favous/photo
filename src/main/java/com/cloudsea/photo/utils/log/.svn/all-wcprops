@@ -1,0 +1,35 @@
+K 25
+svn:wc:ra_dav:version-url
+V 66
+/svn/webSys/!svn/ver/3/trunk/webSys/src/com/cloudsea/sys/utils/log
+END
+LoggerExpand.java
+K 25
+svn:wc:ra_dav:version-url
+V 84
+/svn/webSys/!svn/ver/3/trunk/webSys/src/com/cloudsea/sys/utils/log/LoggerExpand.java
+END
+JDBCAppenderExpand.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/webSys/!svn/ver/3/trunk/webSys/src/com/cloudsea/sys/utils/log/JDBCAppenderExpand.java
+END
+Log.java
+K 25
+svn:wc:ra_dav:version-url
+V 75
+/svn/webSys/!svn/ver/9/trunk/webSys/src/com/cloudsea/sys/utils/log/Log.java
+END
+LoggingEventExpand.java
+K 25
+svn:wc:ra_dav:version-url
+V 90
+/svn/webSys/!svn/ver/3/trunk/webSys/src/com/cloudsea/sys/utils/log/LoggingEventExpand.java
+END
+Log4jConfigListenerExpand.java
+K 25
+svn:wc:ra_dav:version-url
+V 97
+/svn/webSys/!svn/ver/3/trunk/webSys/src/com/cloudsea/sys/utils/log/Log4jConfigListenerExpand.java
+END

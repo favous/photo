@@ -1,0 +1,284 @@
+﻿<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="../css/jquery.dataTables.min.css">
+<link rel="stylesheet" type="text/css" href="../fancyBox/source/jquery.fancybox.css?v=2.1.5" media="screen" />
+
+<script type="text/javascript" src="../lib/common/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="../lib/common/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="../lib/common/jquery.mousewheel-3.0.6.pack.js"></script>
+<script type="text/javascript" src="../fancyBox/source/jquery.fancybox.js?v=2.1.5"></script>
+<script type="text/javascript" src="../lib/common/common.js"></script>
+	
+<script type="text/javascript" charset="utf-8">
+
+	function query(){
+		var url = getRootPath(true) + "/pic/getIconDatas?";
+		var urlParams = getFormParams('queryDiv', encodeURI);
+		loadTable(url + urlParams);
+	}
+
+	function updateIcon(data, succCallback, failCallback){
+		$.ajax({
+			type: "GET",
+			url: getRootPath(true) + "/pic/updateIcon",
+			data: data,
+	        dataType : "jsonp",
+	        jsonp: "callback",//服务端用于接收callback调用的function名的参数  
+			success: function(data){
+				if (data.success){
+					alert(data.message);
+					if (succCallback){						
+						succCallback();
+					}
+				} else {
+					if (failCallback){						
+						failCallback();
+					}
+				}
+			}
+		});
+	}
+	
+	function deleteIcon(data, succCallback, failCallback){
+		ajaxRequest(getRootPath(true) + "/pic/deleteIcon", data, succCallback, failCallback);
+	}
+
+	var column = [
+			{
+				"sDefaultContent" : '',
+				sWidth : "15%",
+				sTitle : "操作",
+				mRender : function(value, type, data, location) {
+					/* if (data.enable && data.enable == '0'){
+						return '';
+					} */
+					return '<a class="deleteIcon" iconId="' + data.id + '" href="javascript:void(0)">删除</a>';
+				}
+			},
+			{
+				"sDefaultContent" : '',
+				sWidth : "15%",
+				sTitle : "操作",
+				mRender : function(value, type, data, location) {
+					if (!data.enable || data.enable != '1') {
+						return '<a class="downIcon" iconId="' + data.id + '" href="javascript:void(0)">下架</a>';
+					}
+					return '';
+				}
+			},
+			{
+				mDataProp : "menuId",
+				sTitle : "图片目录",
+				sWidth : "15%",
+				mRender : function(value, type, data, location) {
+					var list = document.menuList;
+					var html = '<select class="selectMenu updateMenu" iconId="' + data.id + '">';
+					for (var i = 0; i < list.length; i++) {
+						html += '<option value="' + list[i].id + '" ';
+						if (list[i].id == value) {
+							html += ' selected="selected"';
+						}
+						html += '>' + list[i].name + '</option>';
+					}
+					html += '</select>'
+					return html;
+				}
+			},
+			{
+				mDataProp : "createTime",
+				sTitle : "上传时间",
+				sWidth : "15%"
+			},
+			{
+				mDataProp : "enable",
+				sTitle : "状态",
+				sClass : 'enable',
+				sWidth : "15%",
+				mRender : function(value, type, data, location) {
+					if (value && value == '0') {
+						return '上架中'
+					} else if (value && value == '1') {
+						return '已下架'
+					}
+				}
+			},
+			{
+				mDataProp : "src",
+				sTitle : "图示",
+				sWidth : "100px",
+				bVisible : true,
+				bSearchable : true,
+				bSortable : true,
+				sDefaultContent : "无值",
+				sName : "",
+				sClass : 'myClass',
+				mRender : function(value, type, data, location) {
+					return '<a class="fancybox" href="' + data.pictureSrc + '"><img src="' + value + '" style="width:70px;"></a>';
+				},
+				fnCreatedCell : function(nTd, sData, oData, iRow, iCol) {
+
+				}
+			} ];
+
+	function loadTable(url) {
+		var sScrollY = document.body.clientHeight - 160;
+		var config = {
+			//"data": dataSet,
+			"ajax" : url,
+			bServerSide : true,
+			"bProcessing" : true, //是否显示“正在处理”这个提示信息
+			"aoColumns" : column,
+			"aoColumnDefs" : [ {
+				"bVisible" : false,
+			//"aTargets" : [2,3,4] //列数
+			} ],//隐藏列
+			"oLanguage" : {
+				"sUrl" : "de_DE.txt"
+			},
+			"bStateSave" : true,
+			//"bJQueryUI": true,  //使用jqueryui 。我用的时候显示的不是很好
+			"sPaginationType" : "full_numbers",//分页
+			//"sDom":'<"H"if>t<"F"if>',
+			"bPaginate" : true, //开关，是否显示分页器
+			"bInfo" : true, //开关，是否显示表格的页脚信息
+			"bFilter" : true, //开关，是否启用客户端过滤器
+			"bAutoWith" : false,
+			"bDeferRender" : true, //是否启用延迟加载,当你使用AJAX数据源时，可以提升速度。
+			"bJQueryUI" : false, //开关，是否使用jquery ui themeroller的风格
+			"bLengthChange" : true, //开关，是否显示一个每页长度的选择条（需要分页器支持）
+			"iDisplayLength" : 20,
+			"bScrollInfinite" : true,
+			"sScrollY" : sScrollY + "px",
+			"bSort" : true, //开关，按列排序的功能
+			"bDestroy" : true, //执行新的dataTable绑定时，将之前的那个数据对象清除掉
+			"bSortClasses" : true,//开关，指定列在排序时，是否动态增加class 按列以次'sorting_1', 'sorting_2' and 'sorting_3'，打开后，在处理大数据时，性能有所损失
+			"bStateSave" : false, //开关，是否打开客户端状态记录功能。这个数据是记录在cookies中的，打开了这个记录后，即使刷新一次页面，或重新打开浏览器，之前的状态都是保存下来的-			------当值为true时aoColumnDefs不能隐藏列
+			"sScrollX" : "disabled", //是否开启表外部水平滚动宽度，以及指定滚动区域大小,可设值：'disabled','200%'
+			"sScrollXInner" : "100%", //表内部水平滚动宽度,当大于100%时有滚动效果
+			"bAutoWidth" : false, //自适应宽度
+			"aaSorting" : [ [ 1, "asc" ], [ 2, "asc" ] ]
+		//初始化时排序：1列，2升降
+		};
+		var datable = $('#photoTable').dataTable(config);
+	}
+
+	$(document).ready(function() {
+
+				$.ajax({
+					type : "GET",
+					url : getRootPath(true) + "/menu/getMenuItems",
+					data : {},
+					dataType : "jsonp",
+					jsonp : "callback",//服务端用于接收callback调用的function名的参数  
+					success : function(data) {
+						if (data.success) {
+							var select = $('#selectMenu');
+							var menuList = data.data;
+							document.menuList = menuList;
+							for (var i = 0; i < menuList.length; i++) {
+								$("<option></option>").val(menuList[i].id)
+										.text(menuList[i].name)
+										.appendTo(select);
+							}
+						}
+					}
+				});
+
+				//使用fancybox相册功能
+				$('.fancybox').each(function() {
+					var img = $(this).find('img')[0];
+					this.href = img == null ? '' : img.src;
+				});
+				$('.fancybox').fancybox();
+
+				//删除照片
+				$('#photoTable').on('click', '.deleteIcon', function(e) {
+					var id = $(this).attr('iconId');
+					var sel = this;
+					if (confirm("你确定要删除此照片吗？")) {
+						deleteIcon({
+							id : id
+						}, function() {
+							var p = $(sel).parent().parent().remove();
+						});
+					}
+				});
+
+				//下架照片
+				$('#photoTable').on('click', '.downIcon', function(e) {
+					var id = $(this).attr('iconId');
+					var sel = this;
+					if (confirm("你确定要把此照片下架吗？")) {
+						updateIcon({
+							id : id,
+							enable : '1'
+						}, function() {
+							var p = $(sel).parent().siblings(".enable");
+							$(sel).parent().siblings(".enable").html("已下架");
+							$(sel).hide();
+						});
+					}
+				});
+
+				//改照片目录位置
+				$('#photoTable').on('focus', '.updateMenu', function(e) {
+					var val = $(this).val();
+					$(this).attr('currentVal', val);
+				});
+				//改照片目录位置
+				$('#photoTable').on('change', '.updateMenu', function(e) {
+					var text = $(this).find("option:selected").text();
+					var val = $(this).val();
+					var id = $(this).attr('iconId');
+					var sel = this;
+					if (confirm("你确定要把此照片放到“" + text + "”目录下吗？")) {
+						updateIcon({
+							id : id,
+							enable : '0',
+							menuId : val
+						}, function() {
+							$(sel).parent().siblings(".enable").html("上架中");
+							var p = $(sel).parents('tr').find(".downIcon");
+							p.show();
+						}, function() {
+							$(sel).val($(sel).attr('currentVal'));//更新失败，下拉框值回退
+						});
+					} else {
+						$(this).val($(this).attr('currentVal'));//不同意更新，下拉框值回退
+					}
+				});
+			});
+</script>
+</head>
+
+<body>
+
+	<div id="container" align="center">
+		<div align="left">
+		<!-- href路径名前面有applicationPath，只是tomcat配置为空，所以这里看不到 -->
+			<a onclick="#" class="menu" href="/menu/toManageMenu">管理菜单</a>
+			<a onclick="#" class="menu" href="/pic/toManagePhoto">管理照片</a>
+			<a onclick="#" style="position:absolute; right:1%;" href="/user/logout">退出</a>
+		</div>
+		
+		<div id="queryDiv">
+			<select name="enable" class="inconStatus">
+				<option value="">所有状态</option>
+				<option value="0">上架中</option>
+				<option value="1">已下架</option>
+			</select>
+			<select name="menuId" id="selectMenu" class="selectMenu">
+				<option value="">所有目录</option>
+			</select>
+			<input id="query" type="button" value="查询" onclick="javascript:return query();"/>
+		</div>
+		
+		<div id="demo" style='width: 70%;'>
+			<table id="photoTable" cellpadding="5" cellspacing="0" border="1" class="display" align="center">
+			</table>
+		</div>
+	</div>
+
+</body>
+</html>

@@ -1,0 +1,73 @@
+package com.cloudsea.photo.utils.log;
+
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
+import org.apache.log4j.jdbc.JDBCAppender;
+import org.apache.log4j.spi.LoggingEvent;
+
+public class JDBCAppenderExpand extends JDBCAppender {
+	
+	private boolean isExpand = false;
+	private String value = "";
+	private String consumeTime = "";
+
+	
+	@Override
+	protected String getLogStatement(LoggingEvent event) {
+		if (event instanceof LoggingEventExpand){
+			isExpand = true;
+			LoggingEventExpand eventExpand = (LoggingEventExpand) event;
+			value = eventExpand.getValue();
+			consumeTime = eventExpand.getConsumeTime();
+			return super.getLogStatement(eventExpand);
+		}
+		else
+			return super.getLogStatement(event);
+	}
+
+	/**
+	 * 注：由于setClob(int parameterIndex, Reader reader)这个方法是JDBC4.0规范刚加的内容，
+	 * 是以流的方式为CLOB赋值的。并且Oracle9i驱动、Oracle10g驱动、JDK1.4、JDK1.5是基于JDBC3.0规范的，
+	 * 只有Oracle11g驱动+JDK6.0才是基于JDBC4.0规范的，所以目前这个方法只适合
+	 * Oracle11g驱动（ojdbc6.jar）+JDK6.0！
+	 */
+	@Override
+	protected void execute(String sql) throws SQLException {
+		if (!isExpand)
+			super.execute(sql);
+		
+		else {
+			String s1 = sql.substring(0, sql.indexOf(")"));
+			String s2 = sql.substring(sql.indexOf(")"), sql.lastIndexOf(")"));
+			String sqlNew = s1 + ", RUN_VALUE, CONSUME_TIME" + s2 + ", ?, ?)";
+			
+			Connection con = null;
+			PreparedStatement ps = null;
+			try {
+				con = getConnection();
+				ps = con.prepareStatement(sqlNew);
+//				ps.setClob只适合 Oracle11g驱动（ojdbc6.jar）+JDK6.0！
+//				ps.setClob(1, new StringReader(value));
+				//注：setString在jdk1.4、jdk50、jdk6.0和Oracle9i、Oracle10g、Oracle11g驱动下测试通过！
+				ps.setString(1, value);
+				ps.setString(2, consumeTime);
+				ps.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				if (ps != null)
+					ps.close();
+				throw e;
+			} 
+			ps.close();
+			closeConnection(con);
+		}
+	}
+
+}
+
+//INSERT INTO AFS_DRP_SERVER_RUN_LOG(
+//ID, LOG_LEVEL, LOCATION, LINE_NO, FILE_NAME, LOG_TIME, CATEGORY, MESSAGE
+//) VALUES 
+//('LOG' || SEQ_SERVER_RUN_LOG.NEXTVAL ,'%p', '%l', '%L', '%F', '%d{yyyy-MM-dd HH\:mm\:ss}', '%c', '%m')

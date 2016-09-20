@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<!-- saved from url=(0046)http://zc.suning.com/myCF/showMyCF.htm#unknown -->
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<title>新蜂摄影</title>
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+
+<style type="text/css">
+body, button, input, select, textarea {
+	font: 12px/1.5 'Microsoft Yahei', \5b8b\4f53
+}
+li, ol, ul {
+	list-style: none
+}
+body, button, dd, dl, dt, fieldset, form, h1, h2, h3, h4, h5, h6, hr, input, legend, li, ol, p, td,
+	textarea, th, ul {
+	margin: 0;
+	padding: 0
+}
+body {
+	background-color: #FBF9FB;
+}
+a {
+	color: #333;
+	text-decoration: none;
+	outline: 0
+}
+
+
+.menu-header {
+	border-top: 1px solid #DFDFDF;
+	height: 187px;
+	background:
+		url(menu-header-bg.png)
+}
+#userIcon {
+	position: absolute;
+	top: 25px;
+	left: 69px;
+	width: 90px;
+	height: 90px; 
+	z-index: -1
+}
+.menu-header .user-name {
+	margin-top: 130px;
+	font-size: 14px;
+	font-family: "Microsoft Yahei";
+	font-weight: 700;
+	text-align: center
+}
+.menu-header .user-msg {
+	font-size: 12px;
+	font-family: "Microsoft Yahei";
+	text-align: center;
+	line-height: 30px
+}
+.menuArea {
+	position: fixed;
+	left: 600px;
+	width: 228px;
+	z-index: 100;
+}
+.menuList {
+	background: #EBF0F6;
+	box-shadow: -2px 0 1px rgba(0, 0, 0, .1);
+	border: 3px solid #A7B0B9;
+	border-top: none
+}
+.menuList .menu a {
+	position: relative;
+	line-height: 46px;
+	height: 46px;
+	font-size: 14px;
+	color: #777;
+	padding-left: 20px;
+	display: block;
+	outline: 0
+}
+.menuList .menu .menuLinkPage {
+	color: #719;
+}
+.menuList a:hover {
+	background: #A7B0B9;
+	text-decoration: none
+}
+.menuList .focus {
+	height: 44px;
+	border-top: 1px solid #DFDFDF;
+	border-bottom: 1px solid #DFDFDF;
+	padding-left: 4px;
+	width: 225px
+}
+
+.menuList .focus a {
+	background-color: #FBF9FB;
+	line-height: 44px;
+	height: 44px
+}
+</style>
+
+<style type="text/css">
+#gallery {
+	position: absolute;
+	left: 25px;
+	width:100%;
+}
+
+.column {
+	padding-right: 20px;
+	float: left;
+	box-sizing: border-box;
+	display: block;
+}
+.gallery-item {
+	zoom: 1;
+	opacity: 1;
+	display: block;
+}
+.icon {
+	padding-bottom: 20px;
+	padding-right: 20px;
+	height: auto;
+	display: block;
+}
+
+.quer {
+	width: 100%;
+	padding-left: 20px;
+	padding-bottom: 20px;
+	box-sizing: border-box;
+}
+.gallery-item-h {
+	zoom: 1;
+	opacity: 1;
+	float: left;
+}
+.icon-h {
+	padding-bottom: 20px;
+	padding-right: 15px;
+	height: 200px;
+	display: block;
+}
+
+#floatBar {
+	position:fixed; 
+    width: 75px;
+	right: -42px;
+	z-index:30; 
+	top:300;  
+    color: #FFF;
+	font-size: 14px;
+    font-weight: 700;
+    text-align: left;
+	padding-top:5px;
+}
+
+.barBlock {
+	background-color: #AEB2BD;
+	display:table;  
+}
+.barBlock img {
+	width:33px;
+}
+.barBlock span{
+	display:table-cell;
+	vertical-align:middle; 
+}
+</style>
+
+<style type="text/css">
+#uploadPic {
+	position:fixed; 
+    display: none;
+ 	left: 3000px;
+ 	top:70px;
+    width: 700px;
+    height: 450px;
+	z-index:999; 
+    background: #EFEEFF;
+    border: 1px solid CDCCDD;
+}
+
+.uploadItem {
+    float: left;
+    overflow: hidden;
+	padding-top:15px;
+	padding-left:15px;
+    cursor: pointer;
+}
+
+.uploadFile {
+    position: absolute;
+    z-index: 1000;
+    display: block;
+    width: 150px;
+    height: 150px;
+    font-size: 100px;
+    opacity: 0;
+    filter: alpha(opacity=0);
+}
+
+#uploadPic a {
+    display: block;
+    float: left;
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    color: #fff;
+    text-align: center;
+    background: #CCDDFF;
+}
+</style>	
+
+<script type="text/javascript" src="../../lib/common/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="../../lib/common/ajaxfileupload.js"></script>
+<script type="text/javascript" src="../../lib/common/jquery.jsonp.js"></script>
+<script type="text/javascript" src="../lib/jquery.mousewheel-3.0.6.pack.js"></script>
+<script type="text/javascript" src="../source/jquery.fancybox.js?v=2.1.5"></script>
+<link rel="stylesheet" type="text/css" href="../source/jquery.fancybox.css?v=2.1.5" media="screen" />
+
+<script type="text/javascript">
+
+	function isTouch() {
+	    return navigator.userAgent.match(/(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennec|wOSBrowser|BrowserNG|WebOS|Symbian|Windows Phone)/i) ? !0 : !1
+	}
+		
+	$(document).ready(function() {
+		
+		loadMenu();
+		
+		isTouch() || (window.onscroll = function() {
+			var menuArea = $("#menuArea");
+			var clientHeight = document.documentElement.clientHeight;
+			var offsetHeight = menuArea[0].offsetHeight;
+			var scrollTop = $(document).scrollTop();
+			var top = menuArea[0].style.top;
+
+		    if (scrollTop < offsetHeight - clientHeight) {
+		    	menuArea.css({top : '-' + scrollTop + 'px'});
+		    }
+		});
+
+		$(document).on('click', '#menuList .menuGrabData', function(e){
+			//删除原来的内容
+			$('#gallery').html('');
+			
+			var menuId = $(e.target).attr('menuId');
+	    	loadPhoto(parseInt(menuId), 1, true);
+	    });
+		$(document).on('click', '#menuList .menuLinkPage', function(e){
+			var menuId = $(e.target).attr('menuId');
+	    	loadSubPage(parseInt(menuId));
+	    });
+		$('#menuArea').mouseover(function(){
+			$(this).css({left: '0px'});
+		});
+		$('#menuArea').mouseout(function(){
+			$(this).css({left: '-215px'});
+		});
+		
+	});
+	
+	function loadMenu() {
+		$.ajax({
+			type: "GET",
+			url: "http://localhost:9090/photo/menu/getMenuItems",
+			data: {},
+	        dataType : "jsonp",
+	        jsonp: "callback",//服务端用于接收callback调用的function名的参数  
+			success: function(data){
+				if (data.success){
+					var menuList = data.object;
+					for (var i = 0; i < menuList.length; i++) {
+						obj = menuList[i];
+						var li = $('<li class="menu"></li>');
+						var alink = $('<a class="menuGrabData" href="#"></a>');
+						alink.attr('menuId', obj.id);
+						alink.html(obj.name);
+						alink.href = obj.href;
+						alink.appendTo(li);
+						li.appendTo($('#menuList'));
+					}
+					$('.menuArea').animate({left: '-215px'}, 1500);
+				}
+			}
+		});
+	}
+</script>
+
+<script type="text/javascript">
+
+	$(document).ready(function() {
+		addUploadArea();
+		
+		var floatBar = $("#floatBar");
+		var top = (document.documentElement.clientHeight - floatBar[0].offsetHeight)/2 + 'px';
+		floatBar.css({top: top});
+
+		$(document).scroll(function() {
+			var scrollTop = $(document).scrollTop();
+			var shortH = document.shortestHeight;
+			if (shortH && (scrollTop + 500) > shortH) {
+				var page = document.loadedPhotoPageNum;
+				var menuId = document.loadedPhotomenuId;
+				loadPhoto(menuId, ++page, false);
+			}
+		});
+		
+		$('#floatBar').mouseover(function(){
+			$('#floatBar').css({right: '0px'});
+		});
+		$('#floatBar').mouseout(function(){
+			$('#floatBar').css({right: '-42px'});
+		});
+		$('.barBlock').mouseover(function(){
+			$(this).css({cursor:'pointer', backgroundColor: '#0AD'});
+		});
+		$('.barBlock').mouseout(function(){
+			$(this).css({cursor:'pointer', backgroundColor: '#AEB2BD'});
+		});
+		$('#toTop').click(function(){
+			$("html,body").animate({scrollTop: 0}, 'fast');
+        });
+		$('#toUpload').click(function(){
+			var uploadPic = $("#uploadPic");
+			if (uploadPic.css("display") == 'block'){
+				uploadPic.animate({left: '3000px'}, 'fast', function(){
+					uploadPic.css({display: 'none'});
+				});
+			} else {				
+				uploadPic.css({display: 'block'});
+				uploadPic.animate({left: '300px'}, 'fast');
+			}
+        });
+			
+		$(document).on('change', '.uploadFile', function(e){
+			//显示上传进度状态div
+			var uploadFile = $(e.target);
+       		var uploadStatus = $(e.target).find('.uploadStatus');
+       		uploadStatus.css({display:"block"});
+       		
+			$.ajaxFileUpload({
+		    	url: 'http://localhost:9090/photo/photo/upload',           
+		        secureuri: false,
+		        fileElementId: e.target.id,                        
+		        success: function (data, status) { 
+		        	//关闭上传进度状态div
+					uploadStatus.css({display:"none"});
+		        	//去除表单选择数据
+		        	 uploadFile.after(uploadFile.clone().val("")); 
+		        	 uploadFile.remove();
+		        	var botton = uploadFile.find('.uploadBotton');
+		        	if (data.success){
+		        		botton.css({color:"white"});
+		        		botton.html('上传成功')
+		        		addUploadArea();
+		        	} else{
+		        		botton.css({color:"red"});
+	        			botton.html('上传失败');
+		        	} 
+		        }
+		 	});
+        });
+		
+		$('.fancybox').each(function() {
+			var img = $(this).find('img')[0];
+			this.href = img == null ? '' : img.src;
+		});
+		$('.fancybox').fancybox();
+	});
+	
+	function getPictureData(){
+		return pictures;
+	}
+	
+	function loadSubPage(menuId){
+		$.ajax({
+			type: "GET",
+			url: "http://localhost:9090/photo/photo/getSubPageByMenuId",
+			data: {menuId: menuId},
+			dataType: "jsonp",
+	        jsonp: "callback",//服务端用于接收callback调用的function名的参数  
+			success: function(data){
+				
+			}
+		});
+	}
+	
+	function loadPhoto(menuId, page, firstLoad){
+		$.ajax({
+			type: "GET",
+			url: "http://localhost:9090/photo/photo/getPicByMenuId",
+			data: {menuId: menuId, page: page},
+			dataType: "jsonp",
+	        jsonp: "callback",//服务端用于接收callback调用的function名的参数  
+			success: function(data){
+				
+				//第一次加载时
+				if (firstLoad) {
+					if (data.success){
+						//竖排
+						if (data.object.sort == 0) {
+							var colWidth = parseInt(100 / data.object.colNum) + '%';
+							var ul = $('<ul></ul>');
+							ul.appendTo($('#gallery'));
+		
+							for (var i = 0; i < data.object.colNum; i++) {
+								var column = $('<div></div>');
+								column.addClass('column');
+								column.width(colWidth);
+								column.appendTo(ul);
+							}
+						}
+						//横排
+						if (data.object.sort == 1) {
+							var ul = $('<ul class="quer"></ul>');
+							ul.appendTo($('#gallery'));
+						}
+		        	} else{
+	        			alert('没有找到内容');
+		        	} 
+				}
+				
+				if (data.success){					
+					loadPhotoByData(data.object);
+					
+					//保存/更新page和menuId到document，以便滚动时调用
+					document.loadedPhotoPageNum = page;
+					document.loadedPhotomenuId = menuId;
+					
+					var scrollTop = $(document).scrollTop();
+					var shortH = document.shortestHeight;
+					//如果之前加载的图片数大于0
+					if (data.object.iconList && data.object.iconList.length >0) {	
+						//如果滚动条的滚动距离加屏幕距离大于shortH
+						if (scrollTop + document.documentElement.clientHeight >= shortH) {
+							//加载本菜单的下一页图片
+							loadPhoto(menuId, ++page, false);
+						}
+					}
+				}
+			}
+		});
+	}
+	
+	function loadPhotoByData(gallery){
+		
+		var pictures = gallery.iconList;
+		if (gallery.sort == 0){			
+			for (var i = 0; i < pictures.length; i++) {
+				if (!(pictures[i].src && pictures[i].icon_src)){
+					continue;
+				}
+				var col = $('.column');
+				var index = getShortestCol(col);
+				col = $(col[index]);
+				
+				var li = $('<li class="gallery-item"></li>');
+	
+				var a = $('<a class="fancybox"></a>');
+				a.attr('href', pictures[i].src);
+				a.attr('data-fancybox-group', 'gallery');
+	
+				var img = $('<img/>');
+				img.addClass('icon');
+				img.css({width: col.width()});
+				img.attr('src', pictures[i].icon_src);
+				
+				img.appendTo(a);
+				a.appendTo(li);
+				li.appendTo(col);
+			}
+		} else if (gallery.sort == 1){
+			var quer = $('#gallery .quer');
+			for (var i = 0; i < pictures.length; i++) {
+				if (!(pictures[i].src && pictures[i].icon_src)){
+					continue;
+				}
+				var li = $('<li class="gallery-item-h"></li>');
+				
+				var a = $('<a class="fancybox"></a>');
+				a.attr('href', pictures[i].src);
+				a.attr('data-fancybox-group', 'gallery');
+	
+				var img = $('<img class="icon-h" />');
+				var querHeight = parseInt(document.documentElement.clientHeight / gallery.querNum);
+				img.css({height: querHeight});
+				img.attr('src', pictures[i].icon_src);
+				
+				img.appendTo(a);
+				a.appendTo(li);
+				li.appendTo(quer);
+			}
+			document.shortestHeight = li[0].offsetTop;
+		}
+	}
+	
+	function getShortestCol (array) {
+		var index = 0;
+		for (var i = 0; i < array.length; i++){
+			var iHeight = parseInt(array[i].offsetHeight);
+			var indexHeight = parseInt(array[index].offsetHeight);
+			if (iHeight < indexHeight) {
+				index = i;
+				document.shortestHeight = iHeight;
+			}
+		}
+		return index;
+	}
+	
+	function addUploadArea(){
+		var uploadItem = $('<div class="uploadItem"></div>');
+		var file = $('<input type="file" class="uploadFile" name="files" size="0" />');
+		var uploadBotton = $('<a class="uploadBotton">上传照片</a>');
+		var status = $('<div class="uploadStatus"></div>');
+		file.attr('id', 'uploadForm' + new Date().getTime());
+		status.css({display:"none", color:"red"});
+		
+		file.appendTo(uploadItem);
+		uploadBotton.appendTo(uploadItem);
+		status.appendTo(uploadItem);
+		uploadItem.appendTo($('#uploadPic'));
+	}
+	
+</script>
+
+</head>
+
+<body>
+	<div id="container">
+	
+	<!-- 菜单悬浮栏 -->
+		<div id="menuArea" class="menuArea">
+			<div class="menu-header" id="menuHeader">
+				<div class="user-name" id="menuUserName">访客</div>
+				<div class="user-msg" id="menuUserMsg">欢迎您的光临！</div>
+			</div>
+			<img id="userIcon" class="userIcon" src="a6.jpg">
+			<ul id="menuList" class="menuList">
+				<li class="menu"><a class="menuLinkPage" href="../../summary.html">摄影简介</a></li>
+				<li class="menu"><a class="menuLinkPage" href="">联系我们</a></li>
+			</ul>
+			<div>Copyright 南京新蜂摄影工作室 版权所有 </div>
+		</div>
+
+		<!-- 图片显示 -->
+		<div id="gallery"></div>
+		
+		<!-- 右边悬浮栏 -->
+		<div id="floatBar">
+			<div id='toTop' class='barBlock'>
+				<img src='toTop.gif'>
+				<span>回顶部</span>
+			</div>
+			<div id='toUpload' class='barBlock'>
+				<img src='addPic.gif'>
+				<span>传图片</span>
+			</div>
+		</div>
+		
+		<!-- 上传图片层 -->
+		<div id="uploadPic"></div>
+		
+	</div>
+</body>
+</html>

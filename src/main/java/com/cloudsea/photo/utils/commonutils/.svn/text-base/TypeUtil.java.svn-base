@@ -1,0 +1,136 @@
+package com.cloudsea.sys.utils.commonutils;
+
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
+public class TypeUtil {
+
+	static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+	public static boolean isDateType(Class<?> claz) {
+		
+		if(claz == null)
+			return false;
+
+		if (claz == java.sql.Date.class)
+			return true;
+
+		if (claz == java.util.Date.class)
+			return true;
+		
+		return false;
+	}
+	
+	public static boolean isTimestampType(Class<?> claz) {
+		if(claz == null)
+			return false;
+
+		if (claz == java.sql.Timestamp.class)
+			return true;
+		
+		return false;
+	}
+
+
+	public static boolean isBaseType(Class<?> o) {
+		
+		if(o == null)
+			return true;
+		
+		String className = o.getName();
+		if (className == null)
+			return false;
+		if (o.isPrimitive())
+			return true;
+		if (o == Byte.class)
+			return true;
+		if (o == Character.class)
+			return true;
+		if (o == Short.class)
+			return true;
+		if (o == Integer.class)
+			return true;
+		if (o == Long.class)
+			return true;
+		if (o == Float.class)
+			return true;
+		if (o == Double.class)
+			return true;
+		if (o == Boolean.class)
+			return true;
+		if (o == String.class)
+			return true;
+		if (o == StringBuffer.class)
+			return true;
+		if (o == StringBuilder.class)
+			return true;
+		if (o == BigInteger.class)
+			return true;
+		if (o == BigDecimal.class)
+			return true;
+		return false;
+	}
+
+
+	/**
+	 * @param type
+	 * @param value
+	 * @return
+	 * @throws ParseException 
+	 */
+	public static Object convertByTypeFormString(Class<?> type, String str) throws ParseException {
+		Object value = null;
+		if (type == String.class) {
+			value = String.valueOf(str);
+		}
+		else if (type == Character.class || type == char.class) {
+			value = Character.valueOf(str.charAt(0));
+		}
+		else if (type == Short.class || type == short.class) {
+			value = Short.valueOf(str);
+		}
+		else if (type == Integer.class || type == int.class) {
+			value = Integer.valueOf(str);
+		}
+		else if (type == Long.class || type == long.class) {
+			value = Long.valueOf(str);
+		}
+		else if (type == Float.class || type == float.class) {
+			value = Float.valueOf(str);
+		}
+		else if (type == Double.class || type == double.class) {
+			value = Double.valueOf(str);
+		}
+		else if (type == Boolean.class || type == boolean.class) {
+			value = Boolean.valueOf(str);
+		}
+		else if (type == Time.class){
+			if (!str.contains(":"))
+				df = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = df.parse(str);
+			value = new Time(date.getTime());
+		}
+		else if (type == Date.class) {
+			if (!str.contains(":"))
+				df = new SimpleDateFormat("yyyy-MM-dd");
+			value = df.parse(str);
+		}
+		else if (type == java.sql.Date.class){
+			if (!str.contains(":"))
+				df = new SimpleDateFormat("yyyy-MM-dd");
+			Date date = df.parse(str);
+			value = new java.sql.Date(date.getTime());
+		}
+		else if (type == BigInteger.class)
+			value = new BigInteger(str);
+		else if (type == BigDecimal.class)
+			value = new BigDecimal(str);
+		return value;
+	}
+	
+	
+}

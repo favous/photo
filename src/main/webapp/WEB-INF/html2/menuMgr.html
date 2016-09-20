@@ -1,0 +1,327 @@
+﻿<html>
+<head>
+
+<link rel="stylesheet" type="text/css" href="../css/jquery.dataTables.min.css">
+<script type="text/javascript" src="../lib/common/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="../lib/common/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="../lib/common/common.js"></script>
+<style type="text/css">
+	#addMenu {
+		position:fixed; 
+	    display: none;
+	 	top:-500px;
+	    width: 350px;
+	    height: 250px;
+		z-index:999; 
+	    background: #EFEEFF;
+	    border: 1px solid CDCCDD;
+	    padding-left: 40px;
+    	padding-top: 30px;
+	}
+	
+	#menuTable input {
+		width: 99%;
+	}
+	
+	.write_mode {
+		display: none;
+	}
+	
+</style>
+
+<script type="text/javascript" charset="utf-8">
+	function query() {
+		var url = getRootPath(true) + "/menu/getMenuItemList";
+		var meunStatus = $('#meunStatus').val();
+		if (meunStatus) {
+			url += "?enable=" + meunStatus;
+		}
+		loadTable(url);
+	}
+	
+	function toAddMenu() {
+		slipOutDiv('addMenu', 300, 250);
+	}
+	
+	function addMenuItem() {
+		var data = getFormData('addMenu', encodeURI);
+		var succCallback = function(){
+			//清空表单
+			;
+		};
+		ajaxRequest(getRootPath(true) + "/menu/addMenuItem", data, succCallback);
+	}
+	
+	function updateMenuItem(data, succCallback, failCallback) {
+		ajaxRequest(getRootPath(true) + "/menu/updateMenuItem", data, succCallback, failCallback);
+	}
+	
+	function deleteMenuItem(data, succCallback, failCallback) {
+		ajaxRequest(getRootPath(true) + "/menu/deleteMenuItem", data, succCallback, failCallback);
+	}
+	
+	var itemStatusList = [{key:'0', value:'显示'}, {key:'1', value:'隐藏'}];
+	var sortTypeList = [{key:'1', value:'横排'}, {key:'0', value:'竖排'}];
+	
+	var column = [
+			{
+				"sDefaultContent" : '',
+				sWidth : "10%",
+				sTitle : "操作",
+				mRender : function(value, type, data, location) {
+					var galleryId = data.gallery ? data.gallery.id : '';
+					return '<a class="updateRow" mode="0" itemId="' + data.id + '" galleryId="' + galleryId + '" href="javascript:void(0)">修改此行</a>';
+				}
+			}, {
+				"sDefaultContent" : '',
+				sWidth : "10%",
+				sTitle : "操作",
+				mRender : function(value, type, data, location) {
+					return '<a class="deleteMenuItem" itemId="' + data.id + '" href="javascript:void(0)">删除</a>';
+				}
+			}, {
+				mDataProp : "name",
+				sTitle : "名称",
+				sWidth : "10%",
+				mRender : function(value, type, data, location) {
+            		return makeInputHtml("name", value, data, {maxlength:"15"});
+				}
+			}, {
+				mDataProp : "gallery.sort",
+				sTitle : "排列方式",
+				sWidth : "10%",
+				mRender : function(value, type, data, location) {
+					value = typeof(value) == "undefined" ? '' : value;
+					var html = readModeSelect(sortTypeList, value, 'value', 'key');
+            		html += composeSelect(sortTypeList, value, {name:'gallery.sort', 'class':'write_mode', itemId:data.id, style:'width:100%;'});
+            		return html;
+				}
+			}, {
+				mDataProp : "gallery.querNum",
+				sTitle : "横排显示几排",
+				sWidth : "10%",
+				mRender : function(value, type, data, location) {
+            		return makeInputHtml("gallery.querNum", value, data, {maxlength:"2", vtype:"int"});
+				}
+			}, {
+				mDataProp : "gallery.colNum",
+				sTitle : "竖排显示几列",
+				sWidth : "10%",
+				mRender : function(value, type, data, location) {
+            		return makeInputHtml("gallery.colNum", value, data, {maxlength:"2", vtype:"int"});
+				}
+			}, {
+				mDataProp : "enable",
+				sTitle : "状态",
+				sClass : 'enable',
+				sWidth : "10%",
+				mRender : function(value, type, data, location) {
+					value = typeof(value) == "undefined" ? '' : value;
+					var html = readModeSelect(itemStatusList, value, 'value', 'key');
+					html += composeSelect(itemStatusList, value, {name:'enable', 'class':'write_mode updateMenu', itemId:data.id});
+					return html;
+				}
+			}, {
+				mDataProp : "createTime",
+				sTitle : "上传时间",
+				sWidth : "10%"
+			}, {
+				mDataProp : "description",
+				sTitle : "说明",
+				sWidth : "10%"
+			}, ];
+
+	function makeInputHtml(name, value, data, otherAttrObj) {
+		value = typeof(value) == "undefined" ? '' : value;
+		var html = '<span class="read_mode">' + value + '</span>';
+		html += '<input type="text" name="' + name + '" class="write_mode" value="' + value + '"';
+		for (key in otherAttrObj){
+			html += key;
+			html += '="' + otherAttrObj[key] + '" ';
+		}
+		html += ' />';
+		return html;
+	}
+
+	function loadTable(url) {
+		var sScrollY = document.body.clientHeight - 160;
+		var config = {
+			//"data": dataSet,
+			"ajax" : url,
+			bServerSide : true,
+			"bProcessing" : true, //是否显示“正在处理”这个提示信息
+			"aoColumns" : column,
+			"oLanguage" : {
+				"sUrl" : "de_DE.txt"
+			},
+			"bStateSave" : true,
+			//"bJQueryUI": true,  //使用jqueryui 。我用的时候显示的不是很好
+			"sPaginationType" : "full_numbers",//分页
+			//"sDom":'<"H"if>t<"F"if>',
+			"bPaginate" : true, //开关，是否显示分页器
+			"bInfo" : true, //开关，是否显示表格的页脚信息
+			"bFilter" : true, //开关，是否启用客户端过滤器
+			"bAutoWith" : false,
+			"bDeferRender" : true, //是否启用延迟加载,当你使用AJAX数据源时，可以提升速度。
+			"bJQueryUI" : false, //开关，是否使用jquery ui themeroller的风格
+			"bLengthChange" : true, //开关，是否显示一个每页长度的选择条（需要分页器支持）
+			"iDisplayLength" : 20,
+			"bScrollInfinite" : true,
+			"sScrollY" : sScrollY + "px",
+			"bSort" : true, //开关，按列排序的功能
+			"bDestroy" : true, //执行新的dataTable绑定时，将之前的那个数据对象清除掉
+			"bSortClasses" : true,//开关，指定列在排序时，是否动态增加class 按列以次'sorting_1', 'sorting_2' and 'sorting_3'，打开后，在处理大数据时，性能有所损失
+			"bStateSave" : false, //开关，是否打开客户端状态记录功能。这个数据是记录在cookies中的，打开了这个记录后，即使刷新一次页面，或重新打开浏览器，之前的状态都是保存下来的-			------当值为true时aoColumnDefs不能隐藏列
+			"sScrollX" : "disabled", //是否开启表外部水平滚动宽度，以及指定滚动区域大小,可设值：'disabled','200%'
+			"sScrollXInner" : "100%", //表内部水平滚动宽度,当大于100%时有滚动效果
+			"bAutoWidth" : false, //自适应宽度
+			"aaSorting" : [ [ 1, "asc" ], [ 2, "asc" ] ]
+		//初始化时排序：1列，2升降
+		};
+		var datable = $('#menuTable').dataTable(config);
+	}
+
+	$(document).ready(
+			function() {
+
+				//编辑行按钮操作事件
+				$('#menuTable').on('click', '.updateRow', function(e) {
+					if($(this).attr('mode') == '0'){
+						$(this).parents('tr').find('.write_mode').show();
+						$(this).parents('tr').find('.read_mode').hide();
+						$(this).attr('mode', '1');
+						$(this).html('保存');
+						
+					} else if($(this).attr('mode') == '1'){
+						if (confirm("你确定要提交更改吗？")) {
+							
+							//组装数据
+							var data = {id: $(this).attr('itemId')};
+							data['gallery.id'] = $(this).attr('galleryId');
+							var inputList = $(this).parents('tr').find('.write_mode');
+							for (var i = 0; i < inputList.length; i++){
+								var obj = inputList[i];
+								data[obj.name] = obj.value ? encodeURI(obj.value) : (obj.text);
+							}
+							
+							//提交请求
+							updateMenuItem(data);
+							
+							//更新界面与数据
+							$(this).parents('tr').find('.write_mode').each(function() {
+								var label = $(this).siblings('.read_mode');
+								if ($(this).is('select')){
+									label.html($(this).find("option:selected").text());
+								} else {
+									label.html(this.value);
+								}
+							})
+							$(this).parents('tr').find('.read_mode').show();
+							$(this).parents('tr').find('.write_mode').hide();
+							$(this).parents('tr').find('.write_mode').val('');
+							$(this).attr('mode', '0');
+							$(this).html('修改此行');
+						}
+					}
+				});
+
+				//删除目录
+				$('#menuTable').on('click', '.deleteMenuItem', function(e) {
+					var id = $(this).attr('itemId');
+					var sel = this;
+					ajaxRequest(getRootPath(true) + "/pic/countIconBymenuId", {menuId : id},  function(result) {
+						if (result.data && result.data > 0){
+							alert("此目录下还有图片，不可以删除");
+						} else{
+							if (confirm("你确定要删除此目录吗？")) {
+								deleteMenuItem({
+									id : id
+								}, function() {
+									var p = $(sel).parent().parent().remove();
+								});
+							}
+						} 
+					});
+				});
+				
+
+				$(function() {
+					$("input, textarea").on("keyup afterpaste", function() {
+						var obj = this;
+						validateType(obj, function(message, value) {
+							;
+						});
+					});
+					$("input, textarea").on("input propertychange blur", function() {
+						var obj = this;
+						validateType(obj, function(message, value) {
+							obj.focus();
+						});
+					});
+				});
+				
+			});
+</script>
+</head>
+
+<body id="dt_example">
+
+	<div id="container" align="center">
+		<!-- href路径名前面有applicationPath，只是tomcat配置为空，所以这里看不到 -->
+		<div align="left">
+			<a onclick="#" class="menu" href="/menu/toManageMenu">管理菜单</a>
+			<a onclick="#" class="menu" href="/pic/toManagePhoto">管理照片</a>
+			<a onclick="#" style="position:absolute; right:1%;" href="/user/logout">退出</a>
+		</div>
+	
+		<select id="meunStatus" class="meunStatus">
+			<option value="">所有状态</option>
+			<option value="0">显示中</option>
+			<option value="1">隐藏中</option>
+		</select> 
+		<input id="query" type="button" value="查询" onclick="javascript:query();" />
+		
+		<input id="query" type="button" value="添加目录" onclick="javascript:toAddMenu();" />
+
+		<div id="demo" style='width: 70%;'>
+			<table id="menuTable" cellpadding="5" cellspacing="0" border="1"
+				class="display" align="center">
+			</table>
+		</div>
+	</div>
+		
+	<!-- 上传图片层 -->
+	<div id="addMenu">
+		<div>
+			<img alt="" src="">
+		</div>
+		
+		<table>
+			<tr>
+				<td>目录名称</td>
+				<td><input id="name" name="name" type="text" size="30" maxlength="15"/></td>
+			</tr>
+			<tr>
+				<td>排列方式</td>
+				<td><select id="sort" name="gallery.sort" class="write_mode" itemid="1" style="display: inline-block;">
+					<option value="0">竖排</option>
+					<option value="1">横排</option>
+				</select></td>
+			</tr>
+			<tr>
+				<td>显示几行</td>
+				<td><input id="querNum" name="gallery.querNum" type="text" size="30" maxlength="2" vtype="int"/></td>
+			</tr>
+			<tr>
+				<td>显示几列</td>
+				<td><input id="colNum" name="gallery.colNum" type="text" size="30" maxlength="2" vtype="int"/></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td><br><br><input id="submitAdd" type="button" value="提交" onclick="javascript:addMenuItem();" /></td>
+			</tr>
+		</table>
+	</div>
+		
+</body>
+</html>
