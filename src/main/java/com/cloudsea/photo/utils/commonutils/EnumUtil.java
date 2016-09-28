@@ -9,7 +9,7 @@ public class EnumUtil {
 
     private static final String VALUES = "ENUM$VALUES";
 
-    public static <T extends Enum<?>> LinkedHashMap<String, LinkedHashMap<String, Object>> readToMap(Class<T> enumClass)
+    public static <T extends Enum<?>> LinkedHashMap<String, LinkedHashMap<String, Object>> readEnum(Class<T> enumClass)
             throws Exception {
 
         if (!enumClass.isEnum()) {
