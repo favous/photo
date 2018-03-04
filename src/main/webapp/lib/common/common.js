@@ -30,6 +30,9 @@
 		} else {			
 			var fullPath = window.document.location.href;
 			var pathName = window.document.location.pathname;
+			if (!pathName || (pathName.length <= 1 && pathName.startsWith('/'))){
+				return fullPath;
+			}
 			var pos = fullPath.indexOf(pathName);
 			var prePath = fullPath.substring(0, pos);
 			if (postPathNull){
