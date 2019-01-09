@@ -1,4 +1,4 @@
-package com.cloudsea.common.util;
+package com.cloudsea.photo.utils.commonutils;
 
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -122,6 +122,12 @@ public class Json {
 						jsonAarry.add(this.toJSON(obj)); 
 				}
 				return jsonAarry;
+			} else if (t.getClass().isArray()) {
+					JSONArray jsonAarry = new JSONArray();
+					Object[] array = (Object[]) t;
+					for (Object obj : array)
+						jsonAarry.add(this.toJSON(obj)); 
+					return jsonAarry;
 			} else if (Map.class.isAssignableFrom(t.getClass())){
 				
 				Map<?, ?> map = (Map<?, ?>) t;
